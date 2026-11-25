@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /blog/admin/
+Sitemap: https://ascendai.co.za/sitemap.xml
