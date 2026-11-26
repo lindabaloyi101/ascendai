@@ -11,13 +11,13 @@
   var grid = document.getElementById("posts");
   if (grid) BlogDB.list().then(function (list) {
     grid.innerHTML = list.length ? list.map(function (p) { return card(p, "post/index.html?slug=" + encodeURIComponent(p.slug)); }).join("") : '<p class="lead">No posts yet. Check back soon.</p>';
-  }).catch(function () { grid.innerHTML = '<p class="lead">We couldn’t load the posts. Please refresh and try again.</p>'; });
+  }).catch(function (e) { console.error("[blog]", e); grid.innerHTML = '<p class="lead">We couldn’t load the posts. Please refresh and try again.</p>'; });
 
   var latest = document.getElementById("latest-posts");
   if (latest) BlogDB.list(3).then(function (list) {
     if (!list.length) throw 0;
     latest.innerHTML = list.map(function (p) { return card(p, latest.getAttribute("data-href") + encodeURIComponent(p.slug)); }).join("");
-  }).catch(function () { latest.closest("section").hidden = true; });
+  }).catch(function (e) { if (e) console.error("[blog]", e); latest.closest("section").hidden = true; });
 
   var box = document.getElementById("post");
   if (box) {

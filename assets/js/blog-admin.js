@@ -32,8 +32,16 @@
       return fetch(cfg.url + path, { method: o.method || "GET", headers: h, body: o.json ? JSON.stringify(o.json) : o.raw }).then(parse);
     });
   }
+  function write(path, method, json) {
+    return api(path, { method: method, json: json, prefer: "return=representation" }).then(function (rows) {
+      if (!rows || !rows.length) { var e = new Error("Nothing was saved: the database blocked the change. Check the policies in supabase/setup.sql."); e.status = 0; throw e; }
+      return rows;
+    });
+  }
   function fail(e) {
     if (e.status === 401) { keep(null); view("login"); return say("Your session ended. Please sign in again.", 1); }
+    if (e.status === 403 && /permission denied/i.test(e.message)) return say("The database is refusing access to the posts table. Run supabase/grants.sql in the Supabase SQL Editor (see SETUP-BLOG.md), then reload this page.", 1);
+    if (e.status === 403 && /row-level security/i.test(e.message)) return say("Your account isn\u2019t allowed to do that. Check the policies in supabase/setup.sql.", 1);
     say(e.status === 409 ? "A post with this title already exists. Change the title." : e.message, 1);
   }
   function view(v) { ["setup", "login", "reset", "app"].forEach(function (id) { $(id).hidden = id !== v; }); }
@@ -111,19 +119,22 @@
     var id = e.target.getAttribute("data-edit") || e.target.getAttribute("data-pub") || e.target.getAttribute("data-del"); if (!id) return;
     var p = posts.filter(function (x) { return x.id === id; })[0]; if (!p) return;
     if (e.target.hasAttribute("data-edit")) { say("Loading…"); api("/rest/v1/posts?select=*&id=eq." + id).then(function (a) { say(""); open(a[0]); }).catch(fail); }
-    else if (e.target.hasAttribute("data-pub")) { say("Updating…"); api("/rest/v1/posts?id=eq." + id, { method: "PATCH", json: { published: !p.published }, prefer: "return=minimal" }).then(function () { say(p.published ? "Moved to drafts." : "Published. The post is live."); return refresh(); }).catch(fail); }
+    else if (e.target.hasAttribute("data-pub")) { say("Updating…"); write("/rest/v1/posts?id=eq." + id, "PATCH", { published: !p.published }).then(function () { say(p.published ? "Moved to drafts." : "Published. The post is live."); return refresh(); }).catch(fail); }
     else if (confirm("Delete “" + p.title + "”? This removes the post and its image.")) {
       say("Deleting…");
-      api("/rest/v1/posts?id=eq." + id, { method: "DELETE", prefer: "return=minimal" }).then(function () { return rmImage(p.image_url); }).then(function () { say("Post deleted."); return refresh(); }).catch(fail);
+      write("/rest/v1/posts?id=eq." + id, "DELETE").then(function () { return rmImage(p.image_url); }).then(function () { say("Post deleted."); return refresh(); }).catch(fail);
     }
   });
   f.addEventListener("submit", function (e) {
     e.preventDefault();
     var slug = slugOf(); if (!slug) return say("Add a title first.", 1);
     var row = { title: E.title.value.trim(), slug: slug, excerpt: E.excerpt.value.trim(), body: E.body.value, published: E.published.checked, published_at: E.date.value, image_url: img };
-    var old = cur.id ? cur.image_url : "", step = Promise.resolve(); say("Saving…");
-    if (blob) { var name = slug + "-" + Date.now().toString(36) + ".jpg"; step = api("/storage/v1/object/" + BUCKET + "/" + name, { method: "POST", raw: blob, type: "image/jpeg" }).then(function () { row.image_url = cfg.url + "/storage/v1/object/public/" + BUCKET + "/" + name; }); }
-    step.then(function () { return cur.id ? api("/rest/v1/posts?id=eq." + cur.id, { method: "PATCH", json: row, prefer: "return=minimal" }) : api("/rest/v1/posts", { method: "POST", json: row, prefer: "return=minimal" }); })
+    var old = cur.id ? cur.image_url : "", step = Promise.resolve(), up = ""; say("Saving…");
+    if (blob) { var name = slug + "-" + Date.now().toString(36) + ".jpg"; step = api("/storage/v1/object/" + BUCKET + "/" + name, { method: "POST", raw: blob, type: "image/jpeg" }).then(function () { up = row.image_url = cfg.url + "/storage/v1/object/public/" + BUCKET + "/" + name; }); }
+    step.then(function () {
+      return (cur.id ? write("/rest/v1/posts?id=eq." + cur.id, "PATCH", row) : write("/rest/v1/posts", "POST", row))
+        .catch(function (er) { return (up ? rmImage(up) : Promise.resolve()).then(function () { throw er; }); });
+    })
       .then(function () { return old && old !== row.image_url ? rmImage(old) : null; })
       .then(function () { close(true); say(row.published ? "Saved. The post is live." : "Saved as a draft."); return refresh(); }).catch(fail);
   });

@@ -19,6 +19,12 @@ drop trigger if exists posts_updated on public.posts;
 create trigger posts_updated before update on public.posts for each row execute function public.set_updated_at();
 
 alter table public.posts enable row level security;
+
+-- Data API access. Supabase projects created after 30 May 2026 do NOT expose new tables automatically,
+-- so these grants are required or the site gets "permission denied for table posts".
+-- Row Level Security (the policies below) still decides which rows each role may see or change.
+grant select on table public.posts to anon;
+grant select, insert, update, delete on table public.posts to authenticated;
 drop policy if exists "Anyone can read published posts" on public.posts;
 drop policy if exists "Admin can read all posts" on public.posts;
 drop policy if exists "Admin can add posts" on public.posts;
