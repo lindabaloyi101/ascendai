@@ -1,0 +1,4 @@
+.hero{padding:80px 0 96px;overflow:hidden;position:relative}.hero .container{position:relative}
+.hero h1{max-width:9.5em}.hero .lead{margin:28px 0 36px}
+.hero-mark{position:absolute;right:-60px;top:-30px;width:min(46vw,520px);opacity:.14;pointer-events:none}
+@media(max-width:860px){.hero-mark{opacity:.1;width:70vw;right:-20%}}@media(max-width:520px){.hero{padding-top:48px}}
