@@ -1,0 +1,4 @@
+/* Design tokens: colours, type, sizing. Dark mode overrides live here only. */
+:root{--bg:#fff;--bg-alt:#f4f6fb;--ink:#0e1530;--muted:#586082;--brand:#5170ff;--brand-ink:#3452e6;--line:#e2e7f3;--navy:#0e1530;
+--font-head:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;--font-body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+--radius:10px;--max:1120px;--gutter:24px;color-scheme:light}

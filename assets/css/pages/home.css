@@ -1,0 +1,20 @@
+.hero{padding:80px 0 96px;overflow:hidden;position:relative}.hero .container{position:relative}
+.hero h1{max-width:9.5em}.hero .lead{margin:28px 0 36px}
+.hero-mark{position:absolute;right:-60px;top:-30px;width:min(46vw,520px);opacity:.14;pointer-events:none}
+@media(max-width:860px){.hero-mark{opacity:.1;width:70vw;right:-20%}}@media(max-width:520px){.hero{padding-top:48px}}
+/* Proof cards: industry pages as "see it working" */
+.proof{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.proof a{text-decoration:none;color:inherit;display:block;padding:26px;border:1px solid var(--line);border-radius:16px;background:var(--bg);transition:border-color .15s,transform .15s}
+.proof a:hover{border-color:var(--brand);transform:translateY(-2px)}
+.proof .pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--bg-alt);box-shadow:inset 0 0 0 1px var(--line);color:var(--brand-ink);margin-bottom:14px}
+.proof h3{font-size:1.2rem;margin-bottom:8px}.proof p{color:var(--muted);font-size:.98rem}.proof .go{display:inline-block;margin-top:16px;font-weight:700;color:var(--brand-ink)}
+@media(max-width:860px){.proof{grid-template-columns:1fr}}
+/* "We work with the best AI tools" */
+.ai-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.ai-tool{padding:26px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.ai-tool-logo{display:flex;align-items:center;gap:12px;min-height:34px;margin-bottom:12px}
+.ai-tool-logo img{height:28px;width:auto;max-width:44px;object-fit:contain}
+.ai-tool-logo span{font:700 1.2rem var(--font-head)}
+.ai-tool p{color:var(--muted);font-size:.98rem}
+.ai-tools-note{margin-top:20px;font-size:.85rem;color:var(--muted)}
+@media(max-width:860px){.ai-tools{grid-template-columns:1fr}}
